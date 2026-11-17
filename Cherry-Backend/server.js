@@ -40,25 +40,41 @@ const allowedOrigins = [
 // CORS configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests without an Origin header (e.g. server-to-server)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests without an Origin header
+    if (!origin) {
+      return callback(null, false);
     }
+
+    // Explicitly return the matching allowed origin
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, origin);
+    }
+
+    console.error('CORS blocked origin:', origin);
+    return callback(new Error('Not allowed by CORS'));
   },
+
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+
+  methods: [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+    'PATCH',
+    'OPTIONS'
+  ],
+
   allowedHeaders: [
     'Content-Type',
     'Authorization',
     'x-auth-token'
   ],
+
   optionsSuccessStatus: 204
 };
 
-// Apply CORS to all routes and handle preflight requests
+// Apply CORS middleware before all routes
 app.use(cors(corsOptions));
 
 // Parse JSON requests
